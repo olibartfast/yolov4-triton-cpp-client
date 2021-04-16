@@ -22,6 +22,6 @@ https://github.com/triton-inference-server/server/blob/master/docs/client_librar
 * ./yolov4-triton-cpp-client  --video=/path/to/video/videoname.format
 * ./yolov4-triton-cpp-client  --help for all available parameters
 
-### Video test
+### Realtime inference test on video
 * Test runned from VS Code: https://youtu.be/IUdbplJlspg
-* other test: https://youtu.be/VsENXGMNlhA
+* other video inference test: https://youtu.be/VsENXGMNlhA
