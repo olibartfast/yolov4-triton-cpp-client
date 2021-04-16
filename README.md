@@ -23,4 +23,5 @@ https://github.com/triton-inference-server/server/blob/master/docs/client_librar
 * ./yolov4-triton-cpp-client  --help for all available parameters
 
 ### Video test
-https://youtu.be/VsENXGMNlhA
+* Test runned from VS Code: https://youtu.be/IUdbplJlspg
+* other test: https://youtu.be/VsENXGMNlhA
