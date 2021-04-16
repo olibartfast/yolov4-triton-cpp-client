@@ -3,7 +3,6 @@ cmake_minimum_required(VERSION 3.0)
 project(yolov4-triton-cpp-client)
 message(STATUS ${PROJECT_NAME}) 
 message(STATUS $ENV{Triton_Build_DIR})
-message(STATUS $ENV{HOME})
 set(CMAKE_CXX_STANDARD 17)
 
 set(CURL_DIR "$ENV{Triton_Build_DIR}/curl/install/lib/cmake/CURL")

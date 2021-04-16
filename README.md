@@ -1,20 +1,21 @@
 ## C++ Triton YoloV4 client 
 Developed to infer the model deployed in Nvidia Triton Server like in [Isarsoft yolov4-triton-tensorrt repo](https://github.com/isarsoft/yolov4-triton-tensorrt), inference part based on [Wang-Xinyu tensorrtx Yolov4 code](https://github.com/wang-xinyu/tensorrtx/tree/master/yolov4) and communication with server based on [Triton image client](https://github.com/triton-inference-server/server/blob/master/docs/client_examples.md#image-classification-example) example
 
-## Build or download client libraries
+## Build client libraries
 https://github.com/triton-inference-server/server/blob/master/docs/client_libraries.md
 
 
 ## Dependencies
-protobuf, grpc++(you can use libraries builded inside server folder)
-cuda
-rapidjson
-opencv
+* Nvidia Triton Inference Server container pulled from NGC(Tested Release 21.02)
+* Triton client libraries
+* Protobuf, Grpc++, Rapidjson(versions according to the ones used within Triton server project. I used libraries built inside Triton Server folder)
+* Cuda(Tested 11.2)
+* Opencv4(Tested 4.2.0)
 
 ## Build and compile
 * mkdir build 
 * cd build 
-* cmake .. 
+* cmake -DCMAKE_BUILD_TYPE=Release .. 
 * make
 
 ## How to run
@@ -23,5 +24,3 @@ opencv
 
 ### Video test
 https://youtu.be/VsENXGMNlhA
-
-IN PROGRESS AND TO IMPROVE...

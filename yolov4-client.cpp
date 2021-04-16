@@ -1,41 +1,6 @@
-#include "preprocess.hpp"
-#include "postprocess.hpp"
-#include "utils.hpp"
-#include "TritonClient.hpp"
-#include "TritonModelInfo.hpp"
 #include "Yolo.hpp"
+#include "Triton.hpp"
 
-
-
-void setModel(TritonModelInfo& yoloModelInfo, const int batch_size){
-    yoloModelInfo.output_names_ = std::vector<std::string>{"prob"};
-    yoloModelInfo.input_name_ = "data";
-    yoloModelInfo.input_datatype_ = std::string("FP32");
-    // The shape of the input
-    yoloModelInfo.input_c_ = 3;
-    yoloModelInfo.input_w_ = 608;
-    yoloModelInfo.input_h_ = 608;
-    // The format of the input
-    yoloModelInfo.input_format_ = "FORMAT_NCHW";
-    yoloModelInfo.type1_ = CV_32FC1;
-    yoloModelInfo.type3_ = CV_32FC3;
-    yoloModelInfo.max_batch_size_ = 32;
-    yoloModelInfo.shape_.push_back(batch_size);
-    yoloModelInfo.shape_.push_back(yoloModelInfo.input_c_);
-    yoloModelInfo.shape_.push_back(yoloModelInfo.input_h_);
-    yoloModelInfo.shape_.push_back(yoloModelInfo.input_w_);
-
-}
-
-
-std::vector<std::string> readLabelNames(const std::string& fileName){
-    std::vector<std::string> classes;
-    std::ifstream ifs(fileName.c_str());
-    std::string line;
-    while (getline(ifs, line))
-       classes.push_back(line);
-    return classes;   
-}
 
 
 static const std::string keys = 
@@ -60,13 +25,13 @@ int main(int argc, const char* argv[])
     bool verbose = parser.get<bool>("verbose");
     std::string videoName;
     videoName = parser.get<std::string>("video");
-    ProtocolType protocol; 
+    Triton::ProtocolType protocol; 
     if(parser.get<std::string>("protocol") == "grpc")
-        protocol = ProtocolType::GRPC;
-    else protocol = ProtocolType::HTTP;      
+        protocol = Triton::ProtocolType::GRPC;
+    else protocol = Triton::ProtocolType::HTTP;      
     const size_t batch_size = parser.get<size_t>("batch");
 
-    ScaleType scale = ScaleType::YOLOV4;
+    Triton::ScaleType scale = Triton::ScaleType::YOLOV4;
     std::string preprocess_output_filename;
     std::string modelName = "yolov4";
     std::string modelVersion = "";
@@ -77,13 +42,13 @@ int main(int argc, const char* argv[])
     const std::string fileName = parser.get<std::string>("labelsFile"); 
 
     std::cout << "Server address: " << serverAddress << std::endl;
-    std::cout << "Video name: " << parser.get<std::string>("video") << std::endl;
+    std::cout << "Video name: " << videoName << std::endl;
     std::cout << "Protocol:  " << parser.get<std::string>("protocol") << std::endl;
-    std::cout << "Path to labels name:  " << parser.get<std::string>("labelsFile") << std::endl;
+    std::cout << "Path to labels name:  " << fileName << std::endl;
 
-    TritonClient tritonClient;
+    Triton::TritonClient tritonClient;
     nic::Error err;
-    if (protocol == ProtocolType::HTTP)
+    if (protocol == Triton::ProtocolType::HTTP)
     {
         err = nic::InferenceServerHttpClient::Create(
             &tritonClient.httpClient, url, verbose);
@@ -100,9 +65,8 @@ int main(int argc, const char* argv[])
         exit(1);
     }
 
-    scale = ScaleType::YOLOV4;
-    TritonModelInfo yoloModelInfo;
-    setModel(yoloModelInfo, batch_size);
+    Triton::TritonModelInfo yoloModelInfo;
+    Triton::setModel(yoloModelInfo, batch_size);
 
     nic::InferInput *input;
     err = nic::InferInput::Create(
@@ -143,7 +107,12 @@ int main(int argc, const char* argv[])
 
     cv::VideoCapture cap(videoName);
 
-    Yolo::coco_names = readLabelNames(fileName);
+    Yolo::coco_names = Yolo::readLabelNames(fileName);
+
+    if(Yolo::coco_names.size() != Yolo::CLASS_NUM){
+        std::cerr << "Wrong labels filename or wrong path to file: " << fileName << std::endl;
+        exit(1);
+    }
 
     while (cap.read(frame))
     {
@@ -163,7 +132,7 @@ int main(int argc, const char* argv[])
 
         for (size_t batchId = 0; batchId < batch_size; batchId++)
         {
-            input_data_raw.push_back(Preprocess(
+            input_data_raw.push_back(Triton::Preprocess(
                 frameBatch[batchId], yoloModelInfo.input_format_, yoloModelInfo.type1_, yoloModelInfo.type3_,
                 yoloModelInfo.input_c_ , cv::Size(yoloModelInfo.input_w_, yoloModelInfo.input_h_), scale));
             err = input_ptr->AppendRaw(input_data_raw[batchId]);
@@ -176,7 +145,7 @@ int main(int argc, const char* argv[])
 
         nic::InferResult *result;
         std::unique_ptr<nic::InferResult> result_ptr;
-        if (protocol == ProtocolType::HTTP)
+        if (protocol == Triton::ProtocolType::HTTP)
         {
             err = tritonClient.httpClient->Infer(
                 &result, options, inputs, outputs);
@@ -195,20 +164,20 @@ int main(int argc, const char* argv[])
         
         const int DETECTION_SIZE = sizeof(Yolo::Detection) / sizeof(float);
         const int OUTPUT_SIZE = Yolo::MAX_OUTPUT_BBOX_COUNT * DETECTION_SIZE + 1;
-        auto [detections, shape] = PostprocessYoloV4(result, batch_size, yoloModelInfo.output_names_, yoloModelInfo.max_batch_size_ != 0);
+        auto [detections, shape] = Triton::PostprocessYoloV4(result, batch_size, yoloModelInfo.output_names_, yoloModelInfo.max_batch_size_ != 0);
         std::vector<std::vector<Yolo::Detection>> batch_res(batch_size);    
         const float *prob = detections.data();        
         for (size_t batchId = 0; batchId < batch_size; batchId++) 
         {
             auto& res = batch_res[batchId];
-            nms(res, &prob[batchId * OUTPUT_SIZE]);
+            Yolo::nms(res, &prob[batchId * OUTPUT_SIZE]);
         }
         for (size_t batchId = 0; batchId < batch_size; batchId++) 
         {
             auto& res = batch_res[batchId];
             cv::Mat img = frameBatch.at(batchId);
             for (size_t j = 0; j < res.size(); j++) {
-                cv::Rect r = get_rect(img, res[j].bbox);
+                cv::Rect r = Yolo::get_rect(img, res[j].bbox);
                 cv::rectangle(img, r, cv::Scalar(0x27, 0xC1, 0x36), 2);
                 cv::putText(img, Yolo::coco_names[(int)res[j].class_id], cv::Point(r.x, r.y - 1), cv::FONT_HERSHEY_PLAIN, 1.2, cv::Scalar(0xFF, 0xFF, 0xFF), 2);
             }

@@ -11,7 +11,4 @@
 namespace ni = nvidia::inferenceserver;
 namespace nic = nvidia::inferenceserver::client;
 
-enum ScaleType { NONE = 0, YOLOV4 = 1};
-
-enum ProtocolType { HTTP = 0, GRPC = 1 };
 
