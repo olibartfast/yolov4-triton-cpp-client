@@ -21,4 +21,7 @@ opencv
 * ./yolov4-triton-cpp-client  --video=/path/to/video/videoname.format
 * ./yolov4-triton-cpp-client  --help for all available parameters
 
+### Video test
+https://youtu.be/VsENXGMNlhA
+
 IN PROGRESS AND TO IMPROVE...
