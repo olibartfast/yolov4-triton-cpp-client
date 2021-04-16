@@ -81,10 +81,6 @@ int main(int argc, const char* argv[])
     std::cout << "Protocol:  " << parser.get<std::string>("protocol") << std::endl;
     std::cout << "Path to labels name:  " << parser.get<std::string>("labelsFile") << std::endl;
 
-
-    // Create the inference client for the server. From it
-    // extract and validate that the model meets the requirements for
-    // image classification.
     TritonClient tritonClient;
     nic::Error err;
     if (protocol == ProtocolType::HTTP)
@@ -108,7 +104,6 @@ int main(int argc, const char* argv[])
     TritonModelInfo yoloModelInfo;
     setModel(yoloModelInfo, batch_size);
 
-    // Initialize the inputs with the data.
     nic::InferInput *input;
     err = nic::InferInput::Create(
         &input, yoloModelInfo.input_name_, yoloModelInfo.shape_, yoloModelInfo.input_datatype_);
@@ -126,7 +121,6 @@ int main(int argc, const char* argv[])
     for (auto output_name : yoloModelInfo.output_names_)
     {
         nic::InferRequestedOutput *output;
-        // Set the number of classification expected
         err =
             nic::InferRequestedOutput::Create(&output, output_name);
         if (!err.IsOk())
@@ -151,10 +145,8 @@ int main(int argc, const char* argv[])
 
     Yolo::coco_names = readLabelNames(fileName);
 
-    int fcount = 0;
     while (cap.read(frame))
     {
-        fcount++;    
         frameBatch.push_back(frame.clone());
         if (frameBatch.size() < batch_size)
         {
