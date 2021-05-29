@@ -1,15 +1,15 @@
 ## C++ Triton YoloV4 client 
-Developed to infer the model deployed in Nvidia Triton Server like in [Isarsoft yolov4-triton-tensorrt repo](https://github.com/isarsoft/yolov4-triton-tensorrt), inference part based on [Wang-Xinyu tensorrtx Yolov4 code](https://github.com/wang-xinyu/tensorrtx/tree/master/yolov4) and communication with server based on [Triton image client](https://github.com/triton-inference-server/server/blob/master/docs/client_examples.md#image-classification-example) example
+Developed to infer the model deployed in Nvidia Triton Server like in [Isarsoft yolov4-triton-tensorrt repo release v1.3.0](https://github.com/isarsoft/yolov4-triton-tensorrt), inference part based on [Wang-Xinyu tensorrtx Yolov4 code](https://github.com/wang-xinyu/tensorrtx/tree/master/yolov4) and communication with server based on [Triton image client](https://github.com/triton-inference-server/client/blob/r21.05/src/c%2B%2B/examples/image_client.cc) example
 
 ## Build client libraries
-https://github.com/triton-inference-server/server/blob/master/docs/client_libraries.md
+https://github.com/triton-inference-server/client/tree/r21.05
 
 
 ## Dependencies
-* Nvidia Triton Inference Server container pulled from NGC(Tested Release 21.02)
+* Nvidia Triton Inference Server container pulled from NGC(Tested Release 21.05)
 * Triton client libraries
-* Protobuf, Grpc++, Rapidjson(versions according to the ones used within Triton server project. I used libraries built inside Triton Server folder)
-* Cuda(Tested 11.2)
+* Protobuf, Grpc++, Rapidjson(versions according to the ones used within Triton server project. I used libraries built inside Triton Client third party folder)
+* Cuda(Tested 11.3)
 * Opencv4(Tested 4.2.0)
 
 ## Build and compile
