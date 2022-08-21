@@ -161,7 +161,7 @@ int main(int argc, const char* argv[])
                       << std::endl;
             exit(1);
         }
-        
+        result_ptr.reset(result);
         const int DETECTION_SIZE = sizeof(Yolo::Detection) / sizeof(float);
         const int OUTPUT_SIZE = Yolo::MAX_OUTPUT_BBOX_COUNT * DETECTION_SIZE + 1;
         auto [detections, shape] = Triton::PostprocessYoloV4(result, batch_size, yoloModelInfo.output_names_, yoloModelInfo.max_batch_size_ != 0);
